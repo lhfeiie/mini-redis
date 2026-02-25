@@ -6,5 +6,8 @@ project(mini-redis)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
+# 添加调试信息（-g 选项）
+set(CMAKE_BUILD_TYPE Debug)
+
 # 生成可执行文件
 add_executable(mini-redis main.cpp)
