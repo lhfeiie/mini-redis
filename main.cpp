@@ -1,32 +1,47 @@
 #include <iostream>
+#include <memory>
 
+// 用来演示的简单类
+class Resource
+{
+public:
+    Resource(int id) : id_(id)
+    {
+        std::cout << "Resource " << id_ << " 创建了" << std::endl;
+    }
+    ~Resource()
+    {
+        std::cout << "Resource " << id_ << " 销毁了" << std::endl;
+    }
+    int getId() const
+    {
+        return id_;
+    }
+private:
+    int id_;
+};
 
 int main() {
-    
-    // === 栈上的变量 ===
-    int stack_var = 100;
-    std::cout << "栈变量值：" << stack_var << std::endl;
-    std::cout << "栈变量地址：" << &stack_var << std::endl;
-
-    // === 堆上的单个变量 ===
-    int* heap_var = new int(200);
-    std::cout << "堆变量值：" << *heap_var << std::endl;
-    std::cout << "堆变量地址：" << heap_var << std::endl;
-    delete heap_var;
-    heap_var = nullptr;
-
-    // == 堆上的数组 ===
-    int* arr = new int[3];
-    arr[0] = 10;
-    arr[1] = 20;
-    arr[2] = 30;
-    for (int i = 0; i < 3; ++ i)
+    std::cout << "=== unique_ptr 演示 ===" << std::endl;
     {
-        std::cout << "arr[" << i << "] = " << arr[i] << std::endl;
+        std::unique_ptr<Resource> p1 = std::make_unique<Resource>(1);
+        std::cout << "p1 管理的资源id：" << p1->getId() << std::endl;
+        // 离开这个{}作用域时，p1自动销毁Resource 1
     }
-    delete[] arr;
-    arr = nullptr;
+    std::cout << "p1 已离开作用域" << std::endl;
 
-    std::cout << "程序正常结束，内存已释放" << std::endl;
+    std::cout << "\n=== shared_ptr 演示 ===" << std::endl;
+    {
+        std::shared_ptr<Resource> p2 = std::make_shared<Resource>(2);
+        std::cout << "引用计数：" << p2.use_count() << std::endl;   // 1
+        {
+            std::shared_ptr<Resource> p3 = p2;
+            std::cout << "引用计数：" << p2.use_count() << std::endl;   // 2
+            std::cout << "p3 管理的资源 id：" << p3->getId() << std::endl;
+        }   // p3离开作用域，引用计数-1
+        std::cout << "p3 离开后引用计数：" << p2.use_count() << std::endl;  // 1
+    }
+    std::cout << "p2 已离开作用域" << std::endl;
+    
     return 0;
 }
