@@ -1,49 +1,81 @@
 #include <iostream>
-#include <vector>
 #include <string>
-#include <memory>
 
-void printVector(const std::string& name, const std::vector<int>& v)
+// 函数模板：求较大值
+template <typename T>
+T myMax(T a, T b)
 {
-    std::cout << name << ": 大小=" << v.size();
-    if (!v.empty())
-    {
-        std::cout << ", 首元素=" << v[0];
-    }
-    else
-    {
-        std::cout << ", （已被移走，为空）";
-    }
-    std::cout << std::endl;
+    return a > b ? a : b;
 }
 
+// 函数模板：打印数组
+template <typename T>
+void printArray(const T* arr, int size)
+{
+    std::cout << "[";
+    for (int i = 0; i < size; ++ i)
+    {
+        std::cout << arr[i];
+        if (i < size - 1)
+        {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "]" << std::endl;
+}
+
+// 类模板：通用容器 Box
+template <typename T>
+class Box
+{
+public:
+    Box(T value) : value_(value)
+    {
+        std::cout << "Box 创建，存入值" << std::endl;
+    }
+
+    T get() const 
+    {
+        return value_;
+    }
+    void set(T value)
+    {
+        value_ = value;
+    }
+    void print() const
+    {
+        std::cout << "Box 里的值：" << value_ << std::endl;
+    }
+
+private:
+    T value_;
+};
+
 int main() {
-    std::cout << "=== 拷贝 vs 移动 ===" << std::endl;
+    
+    // 函数模板演示
+    std::cout << "=== 函数模板 ===" << std::endl;
+    std::cout << "max(3, 5) = " << myMax(3, 5) << std::endl;
+    std::cout << "max(3.14, 2.71) = " << myMax(3.14, 2.71) << std::endl;
+    std::cout << "max('a', 'z') = " << myMax('a', 'z') << std::endl;
 
-    // 拷贝：数据被完整复制，a不变
-    std::vector<int> a = {1, 2, 3, 4, 5};
-    std::vector<int> b = a;         // 拷贝构造
-    printVector("a（拷贝后）", a);  // a 仍然有数据    
-    printVector("b（拷贝所得）", b);// b 也有数据
+    // printArray 模板演示
+    std::cout << "\n=== printArray 模板 ===" << std::endl;
+    int    ints[]    = {1, 2, 3, 4, 5};
+    double doubles[] = {1.1, 2.2, 3.3};
+    printArray(ints, 5);
+    printArray(doubles, 3);
 
-    std::cout << std::endl;
+    // 类模板演示
+    std::cout << "\n=== 类模板 ===" << std::endl;
+    Box<int>         intBox(42);
+    Box<std::string> strBox(std::string("Hello Template"));
 
-    // 移动：数据被“偷走”，a变空
-    std::vector<int> c = {10, 20, 30, 40, 50};
-    std::vector<int> d = std::move(c);  // 移动构造
-    printVector("c（移动后）", c);      // c已被掏空
-    printVector("d（移动所得）", d);    // d拥有数据
+    intBox.print();
+    strBox.print();
 
-    std::cout << std::endl;
-
-    // unique_ptr 也只能移动，不能拷贝
-    std::cout << "=== unique_ptr 的移动 ===" << std::endl;
-    std::unique_ptr<int> p1 = std::make_unique<int>(42);
-    std::cout << "移动前 p1：" << *p1 << std::endl;
-
-    std::unique_ptr<int> p2 = std::move(p1); // 移交所有权
-    std::cout << "移动后 p1 为空：" << (p1 == nullptr ? "是" : "否") << std::endl;
-    std::cout << "移动后 p2：" << *p2 << std::endl;
+    intBox.set(100);
+    std::cout << "修改后：" << intBox.get() << std::endl;
 
     return 0;
 }
