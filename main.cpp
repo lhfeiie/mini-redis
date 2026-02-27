@@ -1,47 +1,82 @@
 #include <iostream>
-#include <memory>
+#include <fstream>
+#include <stdexcept>
 
-// 用来演示的简单类
-class Resource
+// RAII 文件管理类
+class FileGuard
 {
 public:
-    Resource(int id) : id_(id)
+    // 构造函数：获取资源（打开文件）
+    FileGuard(const std::string& filename, const std::string& mode)
     {
-        std::cout << "Resource " << id_ << " 创建了" << std::endl;
+        if (mode == "write")
+        {
+            file_.open(filename, std::ios::out);
+        }
+        else
+        {
+            file_.open(filename, std::ios::in);
+        }
+        if (!file_.is_open())
+        {
+            throw std::runtime_error("无法打开文件：" + filename);
+        }
+        std::cout << "文件已打开：" << filename << std::endl;
     }
-    ~Resource()
+
+    // 析构函数：释放资源（关闭文件）
+    ~FileGuard()
     {
-        std::cout << "Resource " << id_ << " 销毁了" << std::endl;
+        if (file_.is_open())
+        {
+            file_.close();
+            std::cout << "文件已自动关闭" << std::endl;
+        }
     }
-    int getId() const
+
+    // 禁止复制（防止两个对象管理同一文件）
+    FileGuard(const FileGuard&) = delete;
+    FileGuard& operator=(const FileGuard&) = delete;
+
+    // 写入内容
+    void write(const std::string& content)
     {
-        return id_;
+        file_ << content << std::endl;
     }
+
 private:
-    int id_;
+    std::fstream file_;
 };
 
 int main() {
-    std::cout << "=== unique_ptr 演示 ===" << std::endl;
-    {
-        std::unique_ptr<Resource> p1 = std::make_unique<Resource>(1);
-        std::cout << "p1 管理的资源id：" << p1->getId() << std::endl;
-        // 离开这个{}作用域时，p1自动销毁Resource 1
-    }
-    std::cout << "p1 已离开作用域" << std::endl;
+    // std::cout << "=== RAII 演示 ===" << std::endl;
 
-    std::cout << "\n=== shared_ptr 演示 ===" << std::endl;
-    {
-        std::shared_ptr<Resource> p2 = std::make_shared<Resource>(2);
-        std::cout << "引用计数：" << p2.use_count() << std::endl;   // 1
-        {
-            std::shared_ptr<Resource> p3 = p2;
-            std::cout << "引用计数：" << p2.use_count() << std::endl;   // 2
-            std::cout << "p3 管理的资源 id：" << p3->getId() << std::endl;
-        }   // p3离开作用域，引用计数-1
-        std::cout << "p3 离开后引用计数：" << p2.use_count() << std::endl;  // 1
-    }
-    std::cout << "p2 已离开作用域" << std::endl;
+    // {
+    //     FileGuard fg("test.txt", "write");
+    //     fg.write("Hello, RAII!");
+    //     fg.write("资源会自动释放");
+    //     std::cout << "写入完成，即将离开作用域..." << std::endl;
+    // }   // fg离开作用域，析构函数自动关闭文件
+
+    // std::cout << "已离开作用域，文件已被自动关闭" << std::endl;
+
+    std::cout << "=== RAII 异常安全演示 ===" << std::endl;
     
+    try
+    {
+        FileGuard fg("test.txt", "write");
+        fg.write("第一行");
+
+        // 模拟中途发生异常
+        throw std::runtime_error("模拟业务逻辑出错！");
+
+        fg.write("这行永远不会执行");
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "捕获到异常：" << e.what() << '\n';
+    }
+    
+    std::cout << "程序继续运行，文件已被自动关闭" << std::endl;
     return 0;
 }
