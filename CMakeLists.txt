@@ -17,3 +17,4 @@ add_executable(mini-redis ${SOURCES})
 
 # 把src/ 加入头文件搜索路径，之后 #include 可以用相对路径
 target_include_directories(mini-redis PRIVATE src)
+target_link_libraries(mini-redis pthread)
