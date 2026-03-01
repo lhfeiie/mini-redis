@@ -14,9 +14,18 @@ int main ()
         return 1;
     }
 
-    std::cout << "服务器初始化成功，按 Enter 退出..." << std::endl;
-    std::cin.get();     // ← 临时阻塞，等按 Enter，Day 18 实现 accept 后会删掉
+    std::cout << "等待客户端连接..." << std::endl;
 
+    // 接受一个客户端连接
+    int client_fd = server.acceptClient();
+    if (client_fd == -1)
+    {
+        return 1;
+    }
+
+    std::cout << "连接成功！准备收发数据（Day 19 实现）" << std::endl;
+
+    // 暂时直接关闭
+    close(client_fd);
     return 0;
-    // main 返回时，server 对象析构，server_fd 自动关闭 ← RAII！
 }

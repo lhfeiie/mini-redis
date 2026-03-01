@@ -1,12 +1,6 @@
 // src/server/server.cpp
 #include "server.h"
 
-#include <iostream>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <cstring>
-
 Server::Server(int port) : port_(port), server_fd_(-1)
 {
     // 构造函数：只初始化成员变量，不做 socket 操作
@@ -61,4 +55,26 @@ bool Server::init()
     std::cout << "开始监听..." << std::endl;
 
     return true;
+}
+
+int Server::acceptClient()
+{
+    sockaddr_in client_addr;
+    socklen_t client_len = sizeof(client_addr);
+
+    int client_fd = accept(server_fd_, (struct sockaddr*)&client_addr, &client_len);
+    if (client_fd == -1)
+    {
+        std::cerr << "accept() 失败" << std::endl;
+        return -1;
+    }
+
+    // 打印客户端的 IP 和端口
+    char ip[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &client_addr.sin_addr, ip, sizeof(ip));
+    int port = ntohs(client_addr.sin_port);
+
+    std::cout << "新客户端连接：" << ip << ":" << port << " fd=" << client_fd << std::endl;
+
+    return client_fd;
 }
