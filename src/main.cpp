@@ -23,15 +23,27 @@ int main ()
         return 1;
     }
 
-    // 收数据
+    // 循环收发：一直服务这个客户端，直到它断开
     char buf[1024];
-    int bytes = server.recvData(client_fd, buf, sizeof(buf));
-
-    // 发数据（固定回复，Day 20 改成 echo）
-    if (bytes > 0)
+    while(true)
     {
-        server.sendData(client_fd, "+PONG\r\n");
+        int bytes = server.recvData(client_fd, buf, sizeof(buf));
+
+        if (bytes == 0)
+        {
+            // 客户端正常断开
+            break;
+        }
+        if (bytes == -1)
+        {
+            // 出错
+            break;
+        }
+
+        // Echo: 把收到的内容原样发回去
+        server.sendData(client_fd, std::string(buf, bytes));
     }
+
     
     close(client_fd);
     std::cout << "client_fd 已关闭" << std::endl; 
