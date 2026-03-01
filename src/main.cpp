@@ -14,8 +14,8 @@ int main ()
         return 1;
     }
 
-    std::cout << "服务器初始化成功，fd = " << server.getFd() << std::endl;
-    std::cout << "（本次只测试 socket/bind/listen, accept 下一天实现）" << std::endl;
+    std::cout << "服务器初始化成功，按 Enter 退出..." << std::endl;
+    std::cin.get();     // ← 临时阻塞，等按 Enter，Day 18 实现 accept 后会删掉
 
     return 0;
     // main 返回时，server 对象析构，server_fd 自动关闭 ← RAII！
