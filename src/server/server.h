@@ -30,6 +30,12 @@ public:
     // 失败返回 -1
     int acceptClient();
 
+    // 返回实际收到的字节数；0=对端关闭；-1=出错
+    int recvData(int client_fd, char* buf, int buf_size);
+
+    // 返回实际发送的字节数；-1出错
+    int sendData(int client_fd, const std::string& msg);
+
 private:
     int port_;      // 监听端口
     int server_fd_; // 监听 socket 的fd

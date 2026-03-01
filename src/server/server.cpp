@@ -78,3 +78,42 @@ int Server::acceptClient()
 
     return client_fd;
 }
+
+int Server::recvData(int client_fd, char* buf, int buf_size)
+{
+    // 先把 buf 全部清零，防止上次的数据残留
+    memset(buf, 0, buf_size);
+
+    int bytes = read(client_fd, buf, buf_size - 1);
+
+    if (bytes > 0)
+    {
+        std::cout << "收到数据（" << bytes << " 字节）：" << buf << std::endl;
+    }
+    else if (bytes == 0)
+    {
+        std::cout << "客户端主动断开连接" << std::endl;
+    }
+    else
+    {
+        std::cerr << "read() 出错" << std::endl;
+    }
+
+    return bytes;
+}
+
+int Server::sendData(int client_fd, const std::string& msg)
+{
+    int bytes = write(client_fd, msg.c_str(), msg.size());
+
+    if (bytes == -1)
+    {
+        std::cerr << "write() 出错" << std::endl;
+    }
+    else
+    {
+        std::cout << "已发送（" << bytes << " 字节）：" << msg << std::endl;
+    }
+
+    return bytes;
+}

@@ -23,9 +23,17 @@ int main ()
         return 1;
     }
 
-    std::cout << "连接成功！准备收发数据（Day 19 实现）" << std::endl;
+    // 收数据
+    char buf[1024];
+    int bytes = server.recvData(client_fd, buf, sizeof(buf));
 
-    // 暂时直接关闭
+    // 发数据（固定回复，Day 20 改成 echo）
+    if (bytes > 0)
+    {
+        server.sendData(client_fd, "+PONG\r\n");
+    }
+    
     close(client_fd);
+    std::cout << "client_fd 已关闭" << std::endl; 
     return 0;
 }
