@@ -117,3 +117,17 @@ int Server::sendData(int client_fd, const std::string& msg)
 
     return bytes;
 }
+
+void Server::setNonBlocking(int fd)
+{
+    int flags = fcntl(fd, F_GETFL, 0);
+    if (flags == -1)
+    {
+        std::cerr << "fcntl(F_GETFL) 失败" << std::endl;
+        return;
+    }
+    if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1)
+    {
+        std::cerr << "fcntl(F_SETFL) 失败" << std::endl;
+    }
+}

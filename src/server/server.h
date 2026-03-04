@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <cstring>
+#include <fcntl.h>
 class Server
 {
 public:
@@ -35,6 +36,9 @@ public:
 
     // 返回实际发送的字节数；-1出错
     int sendData(int client_fd, const std::string& msg);
+
+    // 把指定fd设置为非阻塞模式
+    static void setNonBlocking(int fd);
 
 private:
     int port_;      // 监听端口
